@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${titulo != null ? titulo + ' - Pizzaria Web' : 'Pizzaria Web'}">Pizzaria Web</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .navbar-brand {
+            font-weight: bold;
+            color: #dc3545 !important;
+        }
+        .bg-primary {
+            background-color: #dc3545 !important;
+        }
+        .btn-primary {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-primary:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .pizza-card {
+            transition: transform 0.2s;
+        }
+        .pizza-card:hover {
+            transform: translateY(-5px);
+        }
+        .status-badge {
+            font-size: 0.8em;
+        }
+        .pontos-badge {
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            color: #333;
+        }
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 2rem 0;
+            margin-top: 3rem;
+        }
+        .main-content {
+            min-height: calc(100vh - 200px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-pizza-slice me-2"></i>Pizzaria Web
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/"><i class="fas fa-home"></i> Início</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/cardapio"><i class="fas fa-utensils"></i> Cardápio</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/pedidos"><i class="fas fa-shopping-cart"></i> Pedidos</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/promocoes"><i class="fas fa-percentage"></i> Promoções</a>
+                    </li>
+                </ul>
+                <ul class="navbar-nav">
+                    <!-- Menu do usuário logado -->
+                    <li class="nav-item dropdown" th:if="${session.usuarioLogado != null}">
+                        <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user"></i> 
+                            <span th:text="${session.usuarioLogado.nome}">Usuário</span>
+                            <span class="badge pontos-badge ms-2" th:if="${session.usuarioLogado.pontos != null}">
+                                <i class="fas fa-star"></i> <span th:text="${session.usuarioLogado.pontos}">100</span>
+                            </span>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="/perfil"><i class="fas fa-user-cog"></i> Meu Perfil</a></li>
+                            <li><a class="dropdown-item" href="/meus-pedidos"><i class="fas fa-history"></i> Meus Pedidos</a></li>
+                            <li><a class="dropdown-item" href="/pontos"><i class="fas fa-star"></i> Meus Pontos</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="/logout"><i class="fas fa-sign-out-alt"></i> Sair</a></li>
+                        </ul>
+                    </li>
+                    <!-- Links para usuário não logado -->
+                    <li class="nav-item" th:unless="${session.usuarioLogado != null}">
+                        <a class="nav-link" href="/login"><i class="fas fa-sign-in-alt"></i> Entrar</a>
+                    </li>
+                    <li class="nav-item" th:unless="${session.usuarioLogado != null}">
+                        <a class="nav-link" href="/cadastro"><i class="fas fa-user-plus"></i> Cadastrar</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Conteúdo Principal -->
+    <main class="main-content">
+        <!-- Mensagens de alerta -->
+        <div class="container mt-3" th:if="${mensagem != null}">
+            <div class="alert alert-success alert-dismissible fade show" role="alert" th:if="${tipoMensagem == 'sucesso'}">
+                <i class="fas fa-check-circle"></i> <span th:text="${mensagem}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" th:if="${tipoMensagem == 'erro'}">
+                <i class="fas fa-exclamation-circle"></i> <span th:text="${mensagem}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div class="alert alert-warning alert-dismissible fade show" role="alert" th:if="${tipoMensagem == 'aviso'}">
+                <i class="fas fa-exclamation-triangle"></i> <span th:text="${mensagem}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <div class="alert alert-info alert-dismissible fade show" role="alert" th:if="${tipoMensagem == 'info'}">
+                <i class="fas fa-info-circle"></i> <span th:text="${mensagem}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        </div>
+
+        <!-- Conteúdo da página -->
+        <div th:replace="${conteudo}"></div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="fas fa-pizza-slice me-2"></i>Pizzaria Web</h5>
+                    <p>As melhores pizzas da cidade, entregues quentinhas na sua casa!</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contato</h5>
+                    <p><i class="fas fa-phone"></i> (11) 9999-9999</p>
+                    <p><i class="fas fa-envelope"></i> contato@pizzariaweb.com.br</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Rua das Pizzas, 123 - Centro</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Horário de Funcionamento</h5>
+                    <p><strong>Segunda à Quinta:</strong> 18h às 23h</p>
+                    <p><strong>Sexta à Domingo:</strong> 18h às 24h</p>
+                    <div class="mt-3">
+                        <a href="#" class="text-white me-3"><i class="fab fa-facebook fa-lg"></i></a>
+                        <a href="#" class="text-white me-3"><i class="fab fa-instagram fa-lg"></i></a>
+                        <a href="#" class="text-white"><i class="fab fa-whatsapp fa-lg"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="mt-4">
+            <div class="text-center">
+                <p>&copy; 2024 Pizzaria Web. Todos os direitos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Script personalizado para funcionalidades extras -->
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const closeButton = alert.querySelector('.btn-close');
+                if (closeButton) {
+                    closeButton.click();
+                }
+            });
+        }, 5000);
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
